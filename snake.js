@@ -16,8 +16,8 @@ let speed = 200; // السرعة الابتدائية
 let gameInterval;
 
 // الأصوات
-const eatSound = new Audio('sounds/eat.mp3');
-const gameOverSound = new Audio('sounds/gameover.mp3');
+const eatSound = new Audio('eat.mp3');
+const gameOverSound = new Audio('gameover.mp3');
 
 // التحكم بحركة الأفعى باستخدام أزرار التحكم
 document.getElementById("up").addEventListener("click", () => changeDirection("UP"));
