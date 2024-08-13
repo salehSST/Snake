@@ -9,7 +9,20 @@ let score = 0;
 let speed = 150;
 let gameInterval;
 
-resetGame();
+document.getElementById("startButton").addEventListener("click", function() {
+    const playerName = document.getElementById("nameInput").value;
+    if (playerName.trim() === "") {
+        alert("يرجى إدخال اسمك لبدء اللعبة.");
+        return;
+    }
+    document.getElementById("startButton").style.display = "none";
+    document.getElementById("nameInput").style.display = "none";
+    document.getElementById("score").style.display = "block";
+    document.getElementById("gameCanvas").style.display = "block";
+    document.getElementById("controls").style.display = "grid";
+    document.getElementById("resetButton").style.display = "block";
+    resetGame();
+});
 
 function resetGame() {
     snake = [];
@@ -126,5 +139,4 @@ function displayHighScores() {
 
 document.getElementById("resetButton").addEventListener("click", resetGame);
 
-resetGame();
 displayHighScores();
