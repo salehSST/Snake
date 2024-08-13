@@ -9,20 +9,8 @@ let score = 0;
 let speed = 150;
 let gameInterval;
 
-document.getElementById("startButton").addEventListener("click", function() {
-    const playerName = document.getElementById("nameInput").value;
-    if (playerName.trim() === "") {
-        alert("يرجى إدخال اسمك لبدء اللعبة.");
-        return;
-    }
-    document.getElementById("startButton").style.display = "none";
-    document.getElementById("nameInput").style.display = "none";
-    document.getElementById("score").style.display = "block";
-    document.getElementById("gameCanvas").style.display = "block";
-    document.getElementById("controls").style.display = "grid";
-    document.getElementById("resetButton").style.display = "block";
-    resetGame();
-});
+let highScore = localStorage.getItem('highScore') || 0;
+document.getElementById('highScore').innerText = `High Score: ${highScore}`;
 
 function resetGame() {
     snake = [];
@@ -122,18 +110,13 @@ document.getElementById("right").addEventListener("click", () => {
 });
 
 function saveHighScore(score) {
-    const playerName = document.getElementById("nameInput").value || "Anonymous";
-    let highScores = JSON.parse(localStorage.getItem('highScores')) || [];
-    highScores.push({ name: playerName, score: score });
-    highScores.sort((a, b) => b.score - a.score);
-    highScores = highScores.slice(0, 5);
-    localStorage.setItem('highScores', JSON.stringify(highScores));
-}
-
-function displayHighScores() {
-    let highScores = JSON.parse(localStorage.getItem('highScores')) || [];
-    let highScoresElement = document.getElementById('highScores');
-    highScoresElement.innerHTML = `<h3>أعلى الدرجات</h3><ul>${highScores.map(entry => `<li>${entry.name}: ${entry.score}</li>`).join('')}</ul>`;
+    if (score > highScore) {
+        highScore = score;
+        localStorage.setItem('highScore', highScore);
+        document.getElementById('highScore').innerText = `High Score: ${highScore}`;
+    }
 }
 
 document.getElementById("resetButton").addEventListener("click", resetGame);
+
+resetGame();
