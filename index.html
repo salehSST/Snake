@@ -25,8 +25,8 @@
         #gameCanvas {
             border: 2px solid #000;
             background-color: #aaffaa;
-            width: 350px;
-            height: 350px;
+            width: 400px;
+            height: 400px;
         }
 
         #controls {
@@ -65,12 +65,22 @@
             border-radius: 5px;
             cursor: pointer;
         }
+
+        #highScores {
+            margin-top: 20px;
+            font-size: 18px;
+        }
+
+        #nameInput {
+            margin-bottom: 10px;
+        }
     </style>
 </head>
 <body>
     <div id="gameContainer">
+        <input type="text" id="nameInput" placeholder="ادخل اسمك هنا">
         <div id="score">Score: 0 | Level: 1</div>
-        <canvas id="gameCanvas" width="350" height="350"></canvas>
+        <canvas id="gameCanvas" width="400" height="400"></canvas>
         <div id="controls">
             <div></div>
             <div class="control-button" id="up">&#8593;</div>
@@ -80,6 +90,7 @@
             <div class="control-button" id="right">&#8594;</div>
         </div>
         <button id="resetButton">إعادة التشغيل</button>
+        <div id="highScores"></div>
     </div>
 
     <script src="snake.js"></script>
