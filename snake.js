@@ -42,18 +42,6 @@ function generateFood() {
 function draw() {
     ctx.clearRect(0, 0, canvas.width, canvas.height);
 
-    // رسم الأفعى
-    for (let i = 0; i < snake.length; i++) {
-        ctx.fillStyle = i === 0 ? "green" : "white";
-        ctx.fillRect(snake[i].x, snake[i].y, box, box);
-        ctx.strokeStyle = "red";
-        ctx.strokeRect(snake[i].x, snake[i].y, box, box);
-    }
-
-    // رسم الطعام
-    ctx.fillStyle = "red";
-    ctx.fillRect(food.x, food.y, box, box);
-
     // حركة الأفعى
     let snakeX = snake[0].x;
     let snakeY = snake[0].y;
@@ -68,6 +56,18 @@ function draw() {
     if (snakeX < 0) snakeX = canvas.width - box;
     if (snakeY >= canvas.height) snakeY = 0;
     if (snakeY < 0) snakeY = canvas.height - box;
+
+    let newHead = { x: snakeX, y: snakeY };
+
+    // تحقق من الاصطدام
+    if (collision(newHead, snake)) {
+        clearInterval(gameInterval);
+        gameOverSound.play();
+        alert(`انتهت اللعبة! نقاطك: ${score}`);
+        return;
+    }
+
+    snake.unshift(newHead);
 
     // إذا أكلت الأفعى الطعام
     if (snakeX === food.x && snakeY === food.y) {
@@ -84,17 +84,20 @@ function draw() {
         snake.pop();
     }
 
-    let newHead = { x: snakeX, y: snakeY };
-
-    // تحقق من الاصطدام
-    if (collision(newHead, snake)) {
-        clearInterval(gameInterval);
-        gameOverSound.play();
-        alert(`انتهت اللعبة! نقاطك: ${score}`);
-        return;
+    // رسم الأفعى
+    for (let i = 0; i < snake.length; i++) {
+        ctx.fillStyle = i === 0 ? "green" : "white";
+        ctx.fillRect(snake[i].x, snake[i].y, box, box);
+        ctx.strokeStyle = "red";
+        ctx.strokeRect(snake[i].x, snake[i].y, box, box);
     }
 
-    snake.unshift(newHead);
+    // رسم الطعام
+    ctx.fillStyle = "red";
+    ctx.fillRect(food.x, food.y, box, box);
+
+    // تحديث النقاط والمستوى
+    document.getElementById("score").innerText = `Score: ${score} | Level: ${level}`;
 }
 
 function collision(head, array) {
