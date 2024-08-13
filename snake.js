@@ -3,7 +3,7 @@ const ctx = canvas.getContext("2d");
 const scoreElement = document.getElementById("score");
 const resetButton = document.getElementById("resetButton");
 
-const box = 20; // حجم الخلية الواحدة
+const box = 25; // حجم الخلية الواحدة
 let snake = [{ x: 7 * box, y: 7 * box }];
 let direction = null;
 let food = {
@@ -12,7 +12,7 @@ let food = {
 };
 let score = 0;
 let level = 1;
-let speed = 200; // السرعة الابتدائية
+let speed = 150; // السرعة الابتدائية
 let gameInterval;
 
 // الأصوات
@@ -152,7 +152,7 @@ function displayHighScores() {
 function resetGame() {
     score = 0;
     level = 1;
-    speed = 200;
+    speed = 150;
     direction = null;
     snake = [{ x: 7 * box, y: 7 * box }];
     food = {
