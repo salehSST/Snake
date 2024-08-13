@@ -1,138 +1,168 @@
-let names = [];
-let canvas = document.getElementById("wheelCanvas");
-let ctx = canvas.getContext("2d");
-let startAngle = 0;
-let spinTimeout = null;
-let spinAngleStart = 10;
-let spinTime = 0;
-let spinTimeTotal = 0;
-let arc = 0;
-let winners = [];
+const canvas = document.getElementById("gameCanvas");
+const ctx = canvas.getContext("2d");
+const scoreElement = document.getElementById("score");
 
-function getNames() {
-    const numNames = document.getElementById("numNames").value;
-    const nameInputsDiv = document.getElementById("nameInputs");
+const box = 20; // حجم الخلية الواحدة
+let snake = [];
+snake[0] = { x: 7 * box, y: 7 * box }; // بداية الأفعى
+let direction = null;
+let food = {
+    x: Math.floor(Math.random() * 14 + 1) * box,
+    y: Math.floor(Math.random() * 14 + 1) * box,
+};
+let score = 0;
+let level = 1;
+let speed = 150; // السرعة الابتدائية
+let gameInterval;
 
-    // إعادة تعيين القائمة والأسماء
-    nameInputsDiv.innerHTML = "";
-    names = [];
-    winners = [];
-    document.getElementById("winner").innerText = "";
+// الأصوات
+const eatSound = new Audio('sounds/eat.mp3');
+const gameOverSound = new Audio('sounds/gameover.mp3');
 
-    // إنشاء حقول الإدخال للأسماء بناءً على العدد المطلوب
-    for (let i = 0; i < numNames; i++) {
-        const input = document.createElement("input");
-        input.type = "text";
-        input.placeholder = `أدخل الاسم ${i + 1}`;
-        nameInputsDiv.appendChild(input);
-        nameInputsDiv.appendChild(document.createElement("br"));
-        names.push(input);
+// التحكم بحركة الأفعى باستخدام أزرار التحكم
+document.getElementById("up").addEventListener("click", () => changeDirection("UP"));
+document.getElementById("down").addEventListener("click", () => changeDirection("DOWN"));
+document.getElementById("left").addEventListener("click", () => changeDirection("LEFT"));
+document.getElementById("right").addEventListener("click", () => changeDirection("RIGHT"));
+
+// التحكم بحركة الأفعى باستخدام لوحة المفاتيح
+document.addEventListener("keydown", event => {
+    if (event.keyCode == 37 && direction != "RIGHT") {
+        direction = "LEFT";
+    } else if (event.keyCode == 38 && direction != "DOWN") {
+        direction = "UP";
+    } else if (event.keyCode == 39 && direction != "LEFT") {
+        direction = "RIGHT";
+    } else if (event.keyCode == 40 && direction != "UP") {
+        direction = "DOWN";
     }
+});
 
-    // تحديث قيمة الـ arc بناءً على عدد الأسماء
-    arc = Math.PI * 2 / names.length;
+function changeDirection(newDirection) {
+    if (newDirection === "LEFT" && direction !== "RIGHT") {
+        direction = "LEFT";
+    } else if (newDirection === "UP" && direction !== "DOWN") {
+        direction = "UP";
+    } else if (newDirection === "RIGHT" && direction !== "LEFT") {
+        direction = "RIGHT";
+    } else if (newDirection === "DOWN" && direction !== "UP") {
+        direction = "DOWN";
+    }
 }
 
-function drawRouletteWheel() {
-    let outsideRadius = 200;
-    let textRadius = 160;
-    let insideRadius = 125;
-
+function draw() {
     ctx.clearRect(0, 0, canvas.width, canvas.height);
 
-    ctx.strokeStyle = "black";
-    ctx.lineWidth = 2;
+    // رسم الأفعى
+    for (let i = 0; i < snake.length; i++) {
+        ctx.fillStyle = i == 0 ? "green" : "white";
+        ctx.fillRect(snake[i].x, snake[i].y, box, box);
 
-    ctx.font = 'bold 16px Helvetica, Arial';
-
-    for (let i = 0; i < names.length; i++) {
-        let angle = startAngle + i * arc;
-        ctx.fillStyle = i % 2 === 0 ? "#FFDDCC" : "#FFFFFF";
-
-        ctx.beginPath();
-        ctx.arc(canvas.width / 2, canvas.height / 2, outsideRadius, angle, angle + arc, false);
-        ctx.arc(canvas.width / 2, canvas.height / 2, insideRadius, angle + arc, angle, true);
-        ctx.stroke();
-        ctx.fill();
-
-        ctx.save();
-        ctx.fillStyle = "#000";
-        ctx.translate(canvas.width / 2 + Math.cos(angle + arc / 2) * textRadius,
-                      canvas.height / 2 + Math.sin(angle + arc / 2) * textRadius);
-        ctx.rotate(angle + arc / 2 + Math.PI / 2);
-        let text = names[i].value;
-        ctx.fillText(text, -ctx.measureText(text).width / 2, 0);
-        ctx.restore();
+        ctx.strokeStyle = "red";
+        ctx.strokeRect(snake[i].x, snake[i].y, box, box);
     }
 
-    // Arrow
-    ctx.fillStyle = "black";
-    ctx.beginPath();
-    ctx.moveTo(canvas.width / 2 - 4, canvas.height / 2 - (outsideRadius + 5));
-    ctx.lineTo(canvas.width / 2 + 4, canvas.height / 2 - (outsideRadius + 5));
-    ctx.lineTo(canvas.width / 2 + 4, canvas.height / 2 - (outsideRadius - 5));
-    ctx.lineTo(canvas.width / 2 + 9, canvas.height / 2 - (outsideRadius - 5));
-    ctx.lineTo(canvas.width / 2 + 0, canvas.height / 2 - (outsideRadius - 13));
-    ctx.lineTo(canvas.width / 2 - 9, canvas.height / 2 - (outsideRadius - 5));
-    ctx.lineTo(canvas.width / 2 - 4, canvas.height / 2 - (outsideRadius - 5));
-    ctx.lineTo(canvas.width / 2 - 4, canvas.height / 2 - (outsideRadius + 5));
-    ctx.fill();
-}
+    // رسم الطعام
+    ctx.fillStyle = "red";
+    ctx.fillRect(food.x, food.y, box, box);
 
-function rotateWheel() {
-    spinTime += 30;
-    if (spinTime >= spinTimeTotal) {
-        stopRotateWheel();
-        return;
-    }
-    let spinAngle = spinAngleStart - easeOut(spinTime, 0, spinAngleStart, spinTimeTotal);
-    startAngle += (spinAngle * Math.PI / 180);
-    drawRouletteWheel();
-    spinTimeout = setTimeout('rotateWheel()', 30);
-}
+    // حركة الأفعى
+    let snakeX = snake[0].x;
+    let snakeY = snake[0].y;
 
-function stopRotateWheel() {
-    clearTimeout(spinTimeout);
-    let degrees = startAngle * 180 / Math.PI + 90;
-    let arcd = arc * 180 / Math.PI;
-    let index = Math.floor((360 - degrees % 360) / arcd);
-    ctx.save();
-    ctx.font = 'bold 30px Helvetica, Arial';
-    let text = names[index].value;
+    if (direction == "LEFT") snakeX -= box;
+    if (direction == "UP") snakeY -= box;
+    if (direction == "RIGHT") snakeX += box;
+    if (direction == "DOWN") snakeY += box;
 
-    // إضافة الفائز للقائمة
-    winners.push(text);
+    // إذا أكلت الأفعى الطعام
+    if (snakeX == food.x && snakeY == food.y) {
+        score++;
+        eatSound.play();
 
-    // تحقق إذا كان يجب حذف الفائز
-    if (document.getElementById("removeWinners").checked) {
-        names.splice(index, 1); // إزالة الفائز من القائمة
-        arc = Math.PI * 2 / names.length; // إعادة حساب الـ arc
-    }
+        // زيادة المستوى كل 5 نقاط
+        if (score % 5 == 0) {
+            level++;
+            speed = speed > 50 ? speed - 20 : speed; // تقليل الفاصل الزمني لتسريع اللعبة
+            clearInterval(gameInterval);
+            gameInterval = setInterval(draw, speed);
+        }
 
-    ctx.restore();
-
-    // التحقق إذا كان يجب اختيار المزيد من الفائزين
-    let numWinners = parseInt(document.getElementById("numWinners").value);
-    if (winners.length < numWinners && names.length > 0) {
-        spin(); // تشغيل الدائرة مرة أخرى لاختيار الفائز التالي
+        food = {
+            x: Math.floor(Math.random() * 14 + 1) * box,
+            y: Math.floor(Math.random() * 14 + 1) * box,
+        };
     } else {
-        // عرض الفائزين النهائيين
-        document.getElementById("winner").innerText = `الفائزون: ${winners.join(', ')}`;
+        snake.pop();
     }
+
+    let newHead = {
+        x: snakeX,
+        y: snakeY,
+    };
+
+    // تحقق من الاصطدام
+    if (
+        snakeX < 0 ||
+        snakeY < 0 ||
+        snakeX >= canvas.width ||
+        snakeY >= canvas.height ||
+        collision(newHead, snake)
+    ) {
+        clearInterval(gameInterval);
+        gameOverSound.play();
+        saveScore();
+        alert(`انتهت اللعبة! نقاطك: ${score}`);
+        resetGame();
+    }
+
+    snake.unshift(newHead);
+    scoreElement.innerText = `Score: ${score} | Level: ${level}`;
 }
 
-function easeOut(t, b, c, d) {
-    let ts = (t /= d) * t;
-    let tc = ts * t;
-    return b + c * (tc + -3 * ts + 3 * t);
+function collision(head, array) {
+    for (let i = 0; i < array.length; i++) {
+        if (head.x == array[i].x && head.y == array[i].y) {
+            return true;
+        }
+    }
+    return false;
 }
 
-function spin() {
-    spinAngleStart = Math.random() * 10 + 10;
-    spinTime = 0;
-    spinTimeTotal = Math.random() * 3 + 4 * 1000;
-    winners = []; // إعادة تعيين قائمة الفائزين
-    document.getElementById("winner").innerText = ""; // تفريغ النتائج السابقة
-    rotateWheel();
+function saveScore() {
+    let highScores = JSON.parse(localStorage.getItem('highScores')) || [];
+    highScores.push(score);
+    highScores.sort((a, b) => b - a);
+    highScores = highScores.slice(0, 5);
+    localStorage.setItem('highScores', JSON.stringify(highScores));
+    displayHighScores();
 }
 
+function displayHighScores() {
+    let highScores = JSON.parse(localStorage.getItem('highScores')) || [];
+    let highScoresElement = document.getElementById('highScores');
+    if (!highScoresElement) {
+        highScoresElement = document.createElement('div');
+        highScoresElement.id = 'highScores';
+        highScoresElement.style.marginTop = '20px';
+        document.getElementById('gameContainer').appendChild(highScoresElement);
+    }
+
+    highScoresElement.innerHTML = `<h3>أعلى الدرجات</h3><ul>${highScores.map(score => `<li>${score}</li>`).join('')}</ul>`;
+}
+
+function resetGame() {
+    score = 0;
+    level = 1;
+    speed = 150;
+    direction = null;
+    snake = [{ x: 7 * box, y: 7 * box }];
+    food = {
+        x: Math.floor(Math.random() * 14 + 1) * box,
+        y: Math.floor(Math.random() * 14 + 1) * box,
+    };
+    gameInterval = setInterval(draw, speed);
+}
+
+displayHighScores();
+gameInterval = setInterval(draw, speed);
