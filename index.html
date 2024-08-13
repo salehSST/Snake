@@ -20,6 +20,17 @@
             display: flex;
             flex-direction: column;
             align-items: center;
+            width: 100%;
+        }
+
+        #scoreboard {
+            width: 100%;
+            display: flex;
+            justify-content: space-between;
+            padding: 0 20px;
+            box-sizing: border-box;
+            margin-top: 20px;
+            font-size: 28px;
         }
 
         #gameCanvas {
@@ -28,13 +39,7 @@
             margin-top: 20px;
         }
 
-        #score {
-            margin: 20px 0;
-            font-size: 28px;
-            color: #333;
-        }
-
-        #startButton, #resetButton {
+        #resetButton {
             margin-top: 20px;
             padding: 12px 24px;
             font-size: 22px;
@@ -43,16 +48,6 @@
             border: none;
             border-radius: 10px;
             cursor: pointer;
-        }
-
-        #nameInput {
-            margin-bottom: 10px;
-            padding: 10px;
-            font-size: 22px;
-            width: 250px;
-            text-align: center;
-            border-radius: 8px;
-            border: 2px solid #ccc;
         }
 
         #controls {
@@ -74,25 +69,24 @@
             border-radius: 15px;
         }
 
-        #leaderboard {
+        #highScores {
             margin-top: 20px;
-            padding: 10px;
-            font-size: 18px;
-            background-color: #28a745;
-            color: white;
-            border: none;
+            font-size: 24px;
+            background-color: white;
+            border: 2px solid #ccc;
+            padding: 20px;
             border-radius: 10px;
-            cursor: pointer;
         }
     </style>
 </head>
 <body>
     <div id="gameContainer">
-        <input type="text" id="nameInput" placeholder="ادخل اسمك هنا">
-        <button id="startButton">بدء</button>
-        <div id="score" style="display:none;">Score: 0</div>
-        <canvas id="gameCanvas" width="360" height="360" style="display:none;"></canvas>
-        <div id="controls" style="display:none;">
+        <div id="scoreboard">
+            <div id="score">Score: 0</div>
+            <div id="highScore">High Score: 0</div>
+        </div>
+        <canvas id="gameCanvas" width="360" height="360"></canvas>
+        <div id="controls">
             <div></div>
             <div class="control-button" id="up">&#8593;</div>
             <div></div>
@@ -100,8 +94,8 @@
             <div class="control-button" id="down">&#8595;</div>
             <div class="control-button" id="right">&#8594;</div>
         </div>
-        <button id="resetButton" style="display:none;">إعادة التشغيل</button>
-        <button id="leaderboard" onclick="window.location.href='leaderboard.html';">لوحة النتائج</button>
+        <button id="resetButton">إعادة التشغيل</button>
+        <div id="highScores"></div>
     </div>
 
     <script src="snake.js"></script>
