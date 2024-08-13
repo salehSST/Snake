@@ -4,12 +4,15 @@ const scoreElement = document.getElementById("score");
 const resetButton = document.getElementById("resetButton");
 
 const box = 25; // حجم الخلية الواحدة
-let snake = [{ x: 7 * box, y: 7 * box }];
+let snake = []; // مصفوفة لتخزين جسم الأفعى
+
+// تهيئة الأفعى لتبدأ بطول 6 مربعات
+for (let i = 0; i < 6; i++) {
+    snake.push({ x: 7 * box - i * box, y: 7 * box });
+}
+
 let direction = null;
-let food = {
-    x: Math.floor(Math.random() * 14 + 1) * box,
-    y: Math.floor(Math.random() * 14 + 1) * box,
-};
+let food;
 let score = 0;
 let level = 1;
 let speed = 150; // السرعة الابتدائية
@@ -94,10 +97,7 @@ function draw() {
             gameInterval = setInterval(draw, speed);
         }
 
-        food = {
-            x: Math.floor(Math.random() * 14 + 1) * box,
-            y: Math.floor(Math.random() * 14 + 1) * box,
-        };
+        generateFood(); // توليد طعام جديد
     } else {
         snake.pop();
     }
@@ -149,21 +149,39 @@ function displayHighScores() {
     highScoresElement.innerHTML = `<h3>أعلى الدرجات</h3><ul>${highScores.map(score => `<li>${score}</li>`).join('')}</ul>`;
 }
 
+function generateFood() {
+    food = {
+        x: Math.floor(Math.random() * 14 + 1) * box,
+        y: Math.floor(Math.random() * 14 + 1) * box,
+    };
+
+    // تأكد من أن الطعام لا يظهر داخل الأفعى
+    snake.forEach(segment => {
+        if (segment.x == food.x && segment.y == food.y) {
+            generateFood();
+        }
+    });
+}
+
 function resetGame() {
     score = 0;
     level = 1;
     speed = 150;
     direction = null;
-    snake = [{ x: 7 * box, y: 7 * box }];
-    food = {
-        x: Math.floor(Math.random() * 14 + 1) * box,
-        y: Math.floor(Math.random() * 14 + 1) * box,
-    };
+    snake = [];
+
+    // تهيئة الأفعى لتبدأ بطول 6 مربعات
+    for (let i = 0; i < 6; i++) {
+        snake.push({ x: 7 * box - i * box, y: 7 * box });
+    }
+
+    generateFood(); // توليد الطعام
     resetButton.style.display = "none";
     gameInterval = setInterval(draw, speed);
 }
 
 displayHighScores();
+generateFood(); // تأكد من توليد الطعام عند بدء اللعبة
 gameInterval = setInterval(draw, speed);
 
 resetButton.addEventListener("click", resetGame);
