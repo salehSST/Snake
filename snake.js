@@ -6,9 +6,9 @@ const resetButton = document.getElementById("resetButton");
 const box = 25; // حجم الخلية الواحدة
 let snake = []; // مصفوفة لتخزين جسم الأفعى
 
-// تهيئة الأفعى لتبدأ بطول 6 مربعات
+// تهيئة الأفعى لتبدأ بطول 6 مربعات بالطول
 for (let i = 0; i < 6; i++) {
-    snake.push({ x: 7 * box - i * box, y: 7 * box });
+    snake.push({ x: 7 * box, y: 7 * box - i * box });
 }
 
 let direction = null;
@@ -151,8 +151,8 @@ function displayHighScores() {
 
 function generateFood() {
     food = {
-        x: Math.floor(Math.random() * 14 + 1) * box,
-        y: Math.floor(Math.random() * 14 + 1) * box,
+        x: Math.floor(Math.random() * (canvas.width / box)) * box,
+        y: Math.floor(Math.random() * (canvas.height / box)) * box,
     };
 
     // تأكد من أن الطعام لا يظهر داخل الأفعى
@@ -170,9 +170,9 @@ function resetGame() {
     direction = null;
     snake = [];
 
-    // تهيئة الأفعى لتبدأ بطول 6 مربعات
+    // تهيئة الأفعى لتبدأ بطول 6 مربعات بالطول
     for (let i = 0; i < 6; i++) {
-        snake.push({ x: 7 * box - i * box, y: 7 * box });
+        snake.push({ x: 7 * box, y: 7 * box - i * box });
     }
 
     generateFood(); // توليد الطعام
