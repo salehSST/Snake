@@ -12,7 +12,7 @@ for (let i = 0; i < 6; i++) {
 }
 
 let direction = null;
-let food;
+let food = generateFood(); // توليد الطعام عند بدء اللعبة
 let score = 0;
 let level = 1;
 let speed = 150; // السرعة الابتدائية
@@ -97,7 +97,7 @@ function draw() {
             gameInterval = setInterval(draw, speed);
         }
 
-        generateFood(); // توليد طعام جديد
+        food = generateFood(); // توليد طعام جديد
     } else {
         snake.pop();
     }
@@ -108,7 +108,6 @@ function draw() {
     if (collision(newHead, snake)) {
         clearInterval(gameInterval);
         gameOverSound.play();
-        saveScore();
         alert(`انتهت اللعبة! نقاطك: ${score}`);
         resetButton.style.display = "block";
     } else {
@@ -127,40 +126,14 @@ function collision(head, array) {
     return false;
 }
 
-function saveScore() {
-    let highScores = JSON.parse(localStorage.getItem('highScores')) || [];
-    highScores.push(score);
-    highScores.sort((a, b) => b - a);
-    highScores = highScores.slice(0, 5);
-    localStorage.setItem('highScores', JSON.stringify(highScores));
-    displayHighScores();
-}
-
-function displayHighScores() {
-    let highScores = JSON.parse(localStorage.getItem('highScores')) || [];
-    let highScoresElement = document.getElementById('highScores');
-    if (!highScoresElement) {
-        highScoresElement = document.createElement('div');
-        highScoresElement.id = 'highScores';
-        highScoresElement.style.marginTop = '20px';
-        document.getElementById('gameContainer').appendChild(highScoresElement);
-    }
-
-    highScoresElement.innerHTML = `<h3>أعلى الدرجات</h3><ul>${highScores.map(score => `<li>${score}</li>`).join('')}</ul>`;
-}
-
 function generateFood() {
-    food = {
-        x: Math.floor(Math.random() * (canvas.width / box)) * box,
-        y: Math.floor(Math.random() * (canvas.height / box)) * box,
-    };
+    let foodX, foodY;
+    do {
+        foodX = Math.floor(Math.random() * (canvas.width / box)) * box;
+        foodY = Math.floor(Math.random() * (canvas.height / box)) * box;
+    } while (snake.some(segment => segment.x === foodX && segment.y === foodY));
 
-    // تأكد من أن الطعام لا يظهر داخل الأفعى
-    snake.forEach(segment => {
-        if (segment.x == food.x && segment.y == food.y) {
-            generateFood();
-        }
-    });
+    return { x: foodX, y: foodY };
 }
 
 function resetGame() {
@@ -175,13 +148,12 @@ function resetGame() {
         snake.push({ x: 7 * box, y: 7 * box - i * box });
     }
 
-    generateFood(); // توليد الطعام
+    food = generateFood(); // توليد الطعام
     resetButton.style.display = "none";
     gameInterval = setInterval(draw, speed);
 }
 
-displayHighScores();
-generateFood(); // تأكد من توليد الطعام عند بدء اللعبة
-gameInterval = setInterval(draw, speed);
-
 resetButton.addEventListener("click", resetGame);
+
+// بدء اللعبة
+resetGame();
