@@ -2,7 +2,7 @@ const canvas = document.getElementById("gameCanvas");
 const ctx = canvas.getContext("2d");
 
 const box = 25;
-let snake = [];
+let snake = [{ x: 9 * box, y: 10 * box }];
 let direction = null;
 let food;
 let score = 0;
@@ -10,11 +10,9 @@ let level = 1;
 let speed = 150;
 let gameInterval;
 
-// إنشاء الأفعى بطول 6 مربعات
-snake[0] = { x: 9 * box, y: 10 * box };
-for (let i = 1; i < 6; i++) {
-    snake.push({ x: snake[i - 1].x, y: snake[i - 1].y + box });
-}
+// إعداد الأصوات
+const eatSound = new Audio('eat.mp3');
+const gameOverSound = new Audio('gameover.mp3');
 
 // توليد الطعام في مكان عشوائي
 function generateFood() {
@@ -63,6 +61,7 @@ function draw() {
     for (let i = 1; i < snake.length; i++) {
         if (newHead.x === snake[i].x && newHead.y === snake[i].y) {
             clearInterval(gameInterval);
+            gameOverSound.play();
             alert(`Game Over! Your score is ${score}`);
             return;
         }
@@ -73,6 +72,7 @@ function draw() {
     // إذا أكلت الأفعى الطعام
     if (snakeX === food.x && snakeY === food.y) {
         score++;
+        eatSound.play();
         if (score % 5 === 0) {
             level++;
             speed -= 10;
@@ -104,9 +104,6 @@ function resetGame() {
     score = 0;
     level = 1;
     speed = 150;
-    for (let i = 1; i < 6; i++) {
-        snake.push({ x: snake[i - 1].x, y: snake[i - 1].y + box });
-    }
     generateFood();
     gameInterval = setInterval(draw, speed);
 }
