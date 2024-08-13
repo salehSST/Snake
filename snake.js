@@ -1,10 +1,10 @@
 const canvas = document.getElementById("gameCanvas");
 const ctx = canvas.getContext("2d");
 const scoreElement = document.getElementById("score");
+const resetButton = document.getElementById("resetButton");
 
 const box = 20; // حجم الخلية الواحدة
-let snake = [];
-snake[0] = { x: 7 * box, y: 7 * box }; // بداية الأفعى
+let snake = [{ x: 7 * box, y: 7 * box }];
 let direction = null;
 let food = {
     x: Math.floor(Math.random() * 14 + 1) * box,
@@ -12,7 +12,7 @@ let food = {
 };
 let score = 0;
 let level = 1;
-let speed = 150; // السرعة الابتدائية
+let speed = 200; // السرعة الابتدائية
 let gameInterval;
 
 // الأصوات
@@ -75,6 +75,12 @@ function draw() {
     if (direction == "RIGHT") snakeX += box;
     if (direction == "DOWN") snakeY += box;
 
+    // اختراق الجدران
+    if (snakeX >= canvas.width) snakeX = 0;
+    if (snakeX < 0) snakeX = canvas.width - box;
+    if (snakeY >= canvas.height) snakeY = 0;
+    if (snakeY < 0) snakeY = canvas.height - box;
+
     // إذا أكلت الأفعى الطعام
     if (snakeX == food.x && snakeY == food.y) {
         score++;
@@ -96,27 +102,19 @@ function draw() {
         snake.pop();
     }
 
-    let newHead = {
-        x: snakeX,
-        y: snakeY,
-    };
+    let newHead = { x: snakeX, y: snakeY };
 
     // تحقق من الاصطدام
-    if (
-        snakeX < 0 ||
-        snakeY < 0 ||
-        snakeX >= canvas.width ||
-        snakeY >= canvas.height ||
-        collision(newHead, snake)
-    ) {
+    if (collision(newHead, snake)) {
         clearInterval(gameInterval);
         gameOverSound.play();
         saveScore();
         alert(`انتهت اللعبة! نقاطك: ${score}`);
-        resetGame();
+        resetButton.style.display = "block";
+    } else {
+        snake.unshift(newHead);
     }
 
-    snake.unshift(newHead);
     scoreElement.innerText = `Score: ${score} | Level: ${level}`;
 }
 
@@ -154,15 +152,18 @@ function displayHighScores() {
 function resetGame() {
     score = 0;
     level = 1;
-    speed = 150;
+    speed = 200;
     direction = null;
     snake = [{ x: 7 * box, y: 7 * box }];
     food = {
         x: Math.floor(Math.random() * 14 + 1) * box,
         y: Math.floor(Math.random() * 14 + 1) * box,
     };
+    resetButton.style.display = "none";
     gameInterval = setInterval(draw, speed);
 }
 
 displayHighScores();
 gameInterval = setInterval(draw, speed);
+
+resetButton.addEventListener("click", resetGame);
