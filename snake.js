@@ -2,15 +2,22 @@ const canvas = document.getElementById("gameCanvas");
 const ctx = canvas.getContext("2d");
 
 const box = 20;
-let snake = [{ x: 9 * box, y: 10 * box }];
+let snake = [];
 let direction = "RIGHT";
 let food;
 let score = 0;
 let speed = 150;
 let gameInterval;
 
+// بدء اللعبة
+resetGame();
+
 function resetGame() {
-    snake = [{ x: 9 * box, y: 10 * box }];
+    // إعداد الأفعى بطول 5 مربعات
+    snake = [];
+    for (let i = 0; i < 5; i++) {
+        snake.push({ x: 9 * box - i * box, y: 10 * box });
+    }
     direction = "RIGHT";
     score = 0;
     speed = 150;
@@ -69,7 +76,7 @@ function draw() {
 
     snake.unshift(newHead);
 
-    // إذا أكلت الأفعى الطعام
+    // إذا أكلت الأفعى الطعام، ستكبر
     if (snakeX === food.x && snakeY === food.y) {
         score++;
         generateFood();
