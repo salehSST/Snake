@@ -128,7 +128,6 @@ function saveHighScore(score) {
     highScores.sort((a, b) => b.score - a.score);
     highScores = highScores.slice(0, 5);
     localStorage.setItem('highScores', JSON.stringify(highScores));
-    displayHighScores();
 }
 
 function displayHighScores() {
@@ -138,5 +137,3 @@ function displayHighScores() {
 }
 
 document.getElementById("resetButton").addEventListener("click", resetGame);
-
-displayHighScores();
