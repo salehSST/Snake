@@ -2,7 +2,7 @@ const canvas = document.getElementById("gameCanvas");
 const ctx = canvas.getContext("2d");
 
 const box = 25;
-let snake = [];
+let snake = [{ x: 9 * box, y: 10 * box }];
 let direction = null;
 let food;
 let score = 0;
@@ -20,9 +20,9 @@ resetGame();
 function resetGame() {
     snake = [];
     for (let i = 0; i < 5; i++) {
-        snake.push({ x: 9 * box, y: 10 * box + i * box });
+        snake.push({ x: 9 * box, y: 10 * box - i * box });
     }
-    direction = null;
+    direction = "UP";  // تأكد من أن الأفعى تتحرك في اتجاه واحد عند البداية
     score = 0;
     level = 1;
     speed = 150;
@@ -105,10 +105,6 @@ function draw() {
     document.getElementById("score").innerText = `Score: ${score} | Level: ${level}`;
 }
 
-function collision(head, array) {
-    return array.some(segment => segment.x === head.x && segment.y === head.y);
-}
-
 // حفظ وتحديث أعلى النتائج
 function saveScore() {
     const playerName = document.getElementById("nameInput").value || "Anonymous";
@@ -140,17 +136,15 @@ function resetGame() {
     clearInterval(gameInterval);
     snake = [];
     for (let i = 0; i < 5; i++) {
-        snake.push({ x: 9 * box, y: 10 * box + i * box });
+        snake.push({ x: 9 * box, y: 10 * box - i * box });
     }
-    direction = null;
+    direction = "UP";
     score = 0;
     level = 1;
     speed = 150;
     food = generateFood();
     gameInterval = setInterval(draw, speed);
 }
-
-document.getElementById("resetButton").addEventListener("click", resetGame);
 
 resetGame();
 displayHighScores();
