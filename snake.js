@@ -1,56 +1,42 @@
 const canvas = document.getElementById("gameCanvas");
 const ctx = canvas.getContext("2d");
-const scoreElement = document.getElementById("score");
-const resetButton = document.getElementById("resetButton");
-
-const box = 25; // حجم الخلية الواحدة
-let snake = []; // مصفوفة لتخزين جسم الأفعى
-
-// تهيئة الأفعى لتبدأ بطول 6 مربعات بالطول
-for (let i = 0; i < 6; i++) {
-    snake.push({ x: 7 * box, y: 7 * box - i * box });
-}
-
+const box = 25;
+let snake = [];
+let food;
 let direction = null;
-let food = generateFood(); // توليد الطعام عند بدء اللعبة
 let score = 0;
 let level = 1;
-let speed = 150; // السرعة الابتدائية
+let speed = 150;
 let gameInterval;
 
-// الأصوات
+// إعداد الأصوات
 const eatSound = new Audio('eat.mp3');
 const gameOverSound = new Audio('gameover.mp3');
 
-// التحكم بحركة الأفعى باستخدام أزرار التحكم
-document.getElementById("up").addEventListener("click", () => changeDirection("UP"));
-document.getElementById("down").addEventListener("click", () => changeDirection("DOWN"));
-document.getElementById("left").addEventListener("click", () => changeDirection("LEFT"));
-document.getElementById("right").addEventListener("click", () => changeDirection("RIGHT"));
+// بدء اللعبة
+resetGame();
 
-// التحكم بحركة الأفعى باستخدام لوحة المفاتيح
-document.addEventListener("keydown", event => {
-    if (event.keyCode == 37 && direction != "RIGHT") {
-        direction = "LEFT";
-    } else if (event.keyCode == 38 && direction != "DOWN") {
-        direction = "UP";
-    } else if (event.keyCode == 39 && direction != "LEFT") {
-        direction = "RIGHT";
-    } else if (event.keyCode == 40 && direction != "UP") {
-        direction = "DOWN";
+function resetGame() {
+    snake = [];
+    for (let i = 0; i < 6; i++) {
+        snake.push({ x: 7 * box, y: 7 * box - i * box });
     }
-});
+    direction = null;
+    score = 0;
+    level = 1;
+    speed = 150;
+    food = generateFood();
+    clearInterval(gameInterval);
+    gameInterval = setInterval(draw, speed);
+}
 
-function changeDirection(newDirection) {
-    if (newDirection === "LEFT" && direction !== "RIGHT") {
-        direction = "LEFT";
-    } else if (newDirection === "UP" && direction !== "DOWN") {
-        direction = "UP";
-    } else if (newDirection === "RIGHT" && direction !== "LEFT") {
-        direction = "RIGHT";
-    } else if (newDirection === "DOWN" && direction !== "UP") {
-        direction = "DOWN";
-    }
+function generateFood() {
+    let foodX, foodY;
+    do {
+        foodX = Math.floor(Math.random() * (canvas.width / box)) * box;
+        foodY = Math.floor(Math.random() * (canvas.height / box)) * box;
+    } while (snake.some(segment => segment.x === foodX && segment.y === foodY));
+    return { x: foodX, y: foodY };
 }
 
 function draw() {
@@ -58,9 +44,8 @@ function draw() {
 
     // رسم الأفعى
     for (let i = 0; i < snake.length; i++) {
-        ctx.fillStyle = i == 0 ? "green" : "white";
+        ctx.fillStyle = i === 0 ? "green" : "white";
         ctx.fillRect(snake[i].x, snake[i].y, box, box);
-
         ctx.strokeStyle = "red";
         ctx.strokeRect(snake[i].x, snake[i].y, box, box);
     }
@@ -73,10 +58,10 @@ function draw() {
     let snakeX = snake[0].x;
     let snakeY = snake[0].y;
 
-    if (direction == "LEFT") snakeX -= box;
-    if (direction == "UP") snakeY -= box;
-    if (direction == "RIGHT") snakeX += box;
-    if (direction == "DOWN") snakeY += box;
+    if (direction === "LEFT") snakeX -= box;
+    if (direction === "UP") snakeY -= box;
+    if (direction === "RIGHT") snakeX += box;
+    if (direction === "DOWN") snakeY += box;
 
     // اختراق الجدران
     if (snakeX >= canvas.width) snakeX = 0;
@@ -85,19 +70,16 @@ function draw() {
     if (snakeY < 0) snakeY = canvas.height - box;
 
     // إذا أكلت الأفعى الطعام
-    if (snakeX == food.x && snakeY == food.y) {
+    if (snakeX === food.x && snakeY === food.y) {
         score++;
         eatSound.play();
-
-        // زيادة المستوى كل 5 نقاط
-        if (score % 5 == 0) {
+        if (score % 5 === 0) {
             level++;
-            speed = speed > 50 ? speed - 20 : speed; // تقليل الفاصل الزمني لتسريع اللعبة
+            speed = Math.max(50, speed - 20);
             clearInterval(gameInterval);
             gameInterval = setInterval(draw, speed);
         }
-
-        food = generateFood(); // توليد طعام جديد
+        food = generateFood();
     } else {
         snake.pop();
     }
@@ -109,51 +91,23 @@ function draw() {
         clearInterval(gameInterval);
         gameOverSound.play();
         alert(`انتهت اللعبة! نقاطك: ${score}`);
-        resetButton.style.display = "block";
-    } else {
-        snake.unshift(newHead);
+        return;
     }
 
-    scoreElement.innerText = `Score: ${score} | Level: ${level}`;
+    snake.unshift(newHead);
 }
 
 function collision(head, array) {
-    for (let i = 0; i < array.length; i++) {
-        if (head.x == array[i].x && head.y == array[i].y) {
-            return true;
-        }
-    }
-    return false;
+    return array.some(segment => segment.x === head.x && segment.y === head.y);
 }
 
-function generateFood() {
-    let foodX, foodY;
-    do {
-        foodX = Math.floor(Math.random() * (canvas.width / box)) * box;
-        foodY = Math.floor(Math.random() * (canvas.height / box)) * box;
-    } while (snake.some(segment => segment.x === foodX && segment.y === foodY));
+// التحكم في الحركة
+document.addEventListener("keydown", event => {
+    if (event.keyCode === 37 && direction !== "RIGHT") direction = "LEFT";
+    if (event.keyCode === 38 && direction !== "DOWN") direction = "UP";
+    if (event.keyCode === 39 && direction !== "LEFT") direction = "RIGHT";
+    if (event.keyCode === 40 && direction !== "UP") direction = "DOWN";
+});
 
-    return { x: foodX, y: foodY };
-}
-
-function resetGame() {
-    score = 0;
-    level = 1;
-    speed = 150;
-    direction = null;
-    snake = [];
-
-    // تهيئة الأفعى لتبدأ بطول 6 مربعات بالطول
-    for (let i = 0; i < 6; i++) {
-        snake.push({ x: 7 * box, y: 7 * box - i * box });
-    }
-
-    food = generateFood(); // توليد الطعام
-    resetButton.style.display = "none";
-    gameInterval = setInterval(draw, speed);
-}
-
-resetButton.addEventListener("click", resetGame);
-
-// بدء اللعبة
-resetGame();
+// إعادة التشغيل
+document.getElementById("resetButton").addEventListener("click", resetGame);
