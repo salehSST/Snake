@@ -28,16 +28,16 @@
         }
 
         #controls {
-            display: flex;
-            flex-wrap: wrap;
-            justify-content: center;
+            display: grid;
+            grid-template-columns: repeat(3, 80px);
+            grid-template-rows: repeat(3, 80px);
+            gap: 10px;
             margin-top: 20px;
         }
 
         .control-button {
             width: 80px;
             height: 80px;
-            margin: 10px;
             border-radius: 50%;
             background-color: #008cba;
             color: white;
@@ -53,21 +53,38 @@
             font-size: 24px;
             color: #333;
         }
+
+        #resetButton {
+            display: none;
+            margin-top: 20px;
+            padding: 10px 20px;
+            font-size: 18px;
+            background-color: #f0ad4e;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+        }
     </style>
 </head>
 <body>
     <div id="gameContainer">
-        <div id="score">Score: 0</div>
+        <div id="score">Score: 0 | Level: 1</div>
         <canvas id="gameCanvas" width="300" height="300"></canvas>
         <div id="controls">
+            <div class="control-button"></div>
             <div class="control-button" id="up">&#8593;</div>
+            <div class="control-button"></div>
             <div class="control-button" id="left">&#8592;</div>
-            <div class="control-button" id="down">&#8595;</div>
+            <div class="control-button"></div>
             <div class="control-button" id="right">&#8594;</div>
+            <div class="control-button"></div>
+            <div class="control-button" id="down">&#8595;</div>
+            <div class="control-button"></div>
         </div>
+        <button id="resetButton">إعادة التشغيل</button>
     </div>
 
     <script src="snake.js"></script>
 </body>
 </html>
-
