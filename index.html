@@ -52,13 +52,40 @@
         #nameInput {
             margin-bottom: 10px;
         }
+
+        #controls {
+            display: grid;
+            grid-template-columns: repeat(3, 60px);
+            grid-gap: 10px;
+            margin-top: 20px;
+        }
+
+        .control-button {
+            width: 60px;
+            height: 60px;
+            background-color: #008cba;
+            color: white;
+            font-size: 24px;
+            text-align: center;
+            line-height: 60px;
+            cursor: pointer;
+            border-radius: 10px;
+        }
     </style>
 </head>
 <body>
     <div id="gameContainer">
         <input type="text" id="nameInput" placeholder="ادخل اسمك هنا">
         <div id="score">Score: 0</div>
-        <canvas id="gameCanvas" width="400" height="400"></canvas>
+        <canvas id="gameCanvas" width="300" height="300"></canvas>
+        <div id="controls">
+            <div></div>
+            <div class="control-button" id="up">&#8593;</div>
+            <div></div>
+            <div class="control-button" id="left">&#8592;</div>
+            <div class="control-button" id="down">&#8595;</div>
+            <div class="control-button" id="right">&#8594;</div>
+        </div>
         <button id="resetButton">إعادة التشغيل</button>
         <div id="highScores"></div>
     </div>
@@ -66,4 +93,3 @@
     <script src="snake.js"></script>
 </body>
 </html>
-
