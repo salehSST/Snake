@@ -1,46 +1,46 @@
 const canvas = document.getElementById("gameCanvas");
 const ctx = canvas.getContext("2d");
+
 const box = 25;
 let snake = [];
-let food;
 let direction = null;
+let food;
 let score = 0;
 let level = 1;
 let speed = 150;
 let gameInterval;
 
-// إعداد الأصوات
-const eatSound = new Audio('eat.mp3');
-const gameOverSound = new Audio('gameover.mp3');
-
-// بدء اللعبة
-resetGame();
-
-function resetGame() {
-    snake = [];
-    for (let i = 0; i < 6; i++) {
-        snake.push({ x: 7 * box, y: 7 * box - i * box });
-    }
-    direction = null;
-    score = 0;
-    level = 1;
-    speed = 150;
-    food = generateFood();
-    clearInterval(gameInterval);
-    gameInterval = setInterval(draw, speed);
+// إنشاء الأفعى بطول 6 مربعات
+snake[0] = { x: 9 * box, y: 10 * box };
+for (let i = 1; i < 6; i++) {
+    snake.push({ x: snake[i - 1].x, y: snake[i - 1].y + box });
 }
 
+// توليد الطعام في مكان عشوائي
 function generateFood() {
-    let foodX, foodY;
-    do {
-        foodX = Math.floor(Math.random() * (canvas.width / box)) * box;
-        foodY = Math.floor(Math.random() * (canvas.height / box)) * box;
-    } while (snake.some(segment => segment.x === foodX && segment.y === foodY));
-    return { x: foodX, y: foodY };
+    food = {
+        x: Math.floor(Math.random() * 17 + 1) * box,
+        y: Math.floor(Math.random() * 15 + 3) * box
+    };
 }
+
+generateFood();
 
 function draw() {
     ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+    // رسم الأفعى
+    for (let i = 0; i < snake.length; i++) {
+        ctx.fillStyle = (i === 0) ? "green" : "white";
+        ctx.fillRect(snake[i].x, snake[i].y, box, box);
+
+        ctx.strokeStyle = "red";
+        ctx.strokeRect(snake[i].x, snake[i].y, box, box);
+    }
+
+    // رسم الطعام
+    ctx.fillStyle = "red";
+    ctx.fillRect(food.x, food.y, box, box);
 
     // حركة الأفعى
     let snakeX = snake[0].x;
@@ -59,12 +59,13 @@ function draw() {
 
     let newHead = { x: snakeX, y: snakeY };
 
-    // تحقق من الاصطدام
-    if (collision(newHead, snake)) {
-        clearInterval(gameInterval);
-        gameOverSound.play();
-        alert(`انتهت اللعبة! نقاطك: ${score}`);
-        return;
+    // تحقق من الاصطدام بجسم الأفعى
+    for (let i = 1; i < snake.length; i++) {
+        if (newHead.x === snake[i].x && newHead.y === snake[i].y) {
+            clearInterval(gameInterval);
+            alert(`Game Over! Your score is ${score}`);
+            return;
+        }
     }
 
     snake.unshift(newHead);
@@ -72,45 +73,44 @@ function draw() {
     // إذا أكلت الأفعى الطعام
     if (snakeX === food.x && snakeY === food.y) {
         score++;
-        eatSound.play();
         if (score % 5 === 0) {
             level++;
-            speed = Math.max(50, speed - 20);
+            speed -= 10;
             clearInterval(gameInterval);
             gameInterval = setInterval(draw, speed);
         }
-        food = generateFood();
+        generateFood();
     } else {
         snake.pop();
     }
 
-    // رسم الأفعى
-    for (let i = 0; i < snake.length; i++) {
-        ctx.fillStyle = i === 0 ? "green" : "white";
-        ctx.fillRect(snake[i].x, snake[i].y, box, box);
-        ctx.strokeStyle = "red";
-        ctx.strokeRect(snake[i].x, snake[i].y, box, box);
-    }
-
-    // رسم الطعام
-    ctx.fillStyle = "red";
-    ctx.fillRect(food.x, food.y, box, box);
-
-    // تحديث النقاط والمستوى
+    // تحديث النقاط
     document.getElementById("score").innerText = `Score: ${score} | Level: ${level}`;
 }
 
-function collision(head, array) {
-    return array.some(segment => segment.x === head.x && segment.y === head.y);
-}
+document.addEventListener("keydown", directionHandler);
 
-// التحكم في الحركة
-document.addEventListener("keydown", event => {
+function directionHandler(event) {
     if (event.keyCode === 37 && direction !== "RIGHT") direction = "LEFT";
     if (event.keyCode === 38 && direction !== "DOWN") direction = "UP";
     if (event.keyCode === 39 && direction !== "LEFT") direction = "RIGHT";
     if (event.keyCode === 40 && direction !== "UP") direction = "DOWN";
-});
+}
 
-// إعادة التشغيل
+function resetGame() {
+    clearInterval(gameInterval);
+    snake = [{ x: 9 * box, y: 10 * box }];
+    direction = null;
+    score = 0;
+    level = 1;
+    speed = 150;
+    for (let i = 1; i < 6; i++) {
+        snake.push({ x: snake[i - 1].x, y: snake[i - 1].y + box });
+    }
+    generateFood();
+    gameInterval = setInterval(draw, speed);
+}
+
 document.getElementById("resetButton").addEventListener("click", resetGame);
+
+resetGame();
