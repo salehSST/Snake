@@ -9,13 +9,11 @@ let score = 0;
 let speed = 150;
 let gameInterval;
 
-// بدء اللعبة
 resetGame();
 
 function resetGame() {
-    // إعداد الأفعى بطول 5 مربعات
     snake = [];
-    for (let i = 0; i < 5; i++) {
+    for (let i = 0; i < 9; i++) {
         snake.push({ x: 9 * box - i * box, y: 10 * box });
     }
     direction = "RIGHT";
@@ -36,7 +34,6 @@ function generateFood() {
 function draw() {
     ctx.clearRect(0, 0, canvas.width, canvas.height);
 
-    // رسم الأفعى
     for (let i = 0; i < snake.length; i++) {
         ctx.fillStyle = (i === 0) ? "green" : "white";
         ctx.fillRect(snake[i].x, snake[i].y, box, box);
@@ -45,11 +42,9 @@ function draw() {
         ctx.strokeRect(snake[i].x, snake[i].y, box, box);
     }
 
-    // رسم الطعام
     ctx.fillStyle = "red";
     ctx.fillRect(food.x, food.y, box, box);
 
-    // حركة الأفعى
     let snakeX = snake[0].x;
     let snakeY = snake[0].y;
 
@@ -58,7 +53,6 @@ function draw() {
     if (direction === "RIGHT") snakeX += box;
     if (direction === "DOWN") snakeY += box;
 
-    // اختراق الجدران
     if (snakeX >= canvas.width) snakeX = 0;
     if (snakeX < 0) snakeX = canvas.width - box;
     if (snakeY >= canvas.height) snakeY = 0;
@@ -66,7 +60,6 @@ function draw() {
 
     let newHead = { x: snakeX, y: snakeY };
 
-    // تحقق من الاصطدام بجسم الأفعى
     if (collision(newHead, snake)) {
         clearInterval(gameInterval);
         alert(`Game Over! Score: ${score}`);
@@ -76,7 +69,6 @@ function draw() {
 
     snake.unshift(newHead);
 
-    // إذا أكلت الأفعى الطعام، ستكبر
     if (snakeX === food.x && snakeY === food.y) {
         score++;
         generateFood();
@@ -84,7 +76,6 @@ function draw() {
         snake.pop();
     }
 
-    // تحديث النقاط
     document.getElementById("score").innerText = `Score: ${score}`;
 }
 
@@ -92,7 +83,6 @@ function collision(head, array) {
     return array.some(segment => segment.x === head.x && segment.y === head.y);
 }
 
-// التحكم في الحركة
 document.addEventListener("keydown", directionHandler);
 
 function directionHandler(event) {
@@ -101,6 +91,22 @@ function directionHandler(event) {
     if (event.keyCode === 39 && direction !== "LEFT") direction = "RIGHT";
     if (event.keyCode === 40 && direction !== "UP") direction = "DOWN";
 }
+
+document.getElementById("up").addEventListener("click", () => {
+    if (direction !== "DOWN") direction = "UP";
+});
+
+document.getElementById("left").addEventListener("click", () => {
+    if (direction !== "RIGHT") direction = "LEFT";
+});
+
+document.getElementById("down").addEventListener("click", () => {
+    if (direction !== "UP") direction = "DOWN";
+});
+
+document.getElementById("right").addEventListener("click", () => {
+    if (direction !== "LEFT") direction = "RIGHT";
+});
 
 function saveHighScore(score) {
     const playerName = document.getElementById("nameInput").value || "Anonymous";
