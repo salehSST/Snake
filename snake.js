@@ -3,7 +3,7 @@ const ctx = canvas.getContext("2d");
 
 const box = 25;
 let snake = [{ x: 9 * box, y: 10 * box }];
-let direction = null;
+let direction = "UP"; // تحديد الاتجاه الافتراضي للأفعى
 let food;
 let score = 0;
 let level = 1;
@@ -18,11 +18,8 @@ const gameOverSound = new Audio('gameover.mp3');
 resetGame();
 
 function resetGame() {
-    snake = [];
-    for (let i = 0; i < 5; i++) {
-        snake.push({ x: 9 * box, y: 10 * box - i * box });
-    }
-    direction = "UP";  // تأكد من أن الأفعى تتحرك في اتجاه واحد عند البداية
+    snake = [{ x: 9 * box, y: 10 * box }]; // بدء الأفعى بمربع واحد
+    direction = "UP";
     score = 0;
     level = 1;
     speed = 150;
@@ -44,13 +41,10 @@ function draw() {
     ctx.clearRect(0, 0, canvas.width, canvas.height);
 
     // رسم الأفعى
-    for (let i = 0; i < snake.length; i++) {
-        ctx.fillStyle = (i === 0) ? "green" : "white";
-        ctx.fillRect(snake[i].x, snake[i].y, box, box);
-
-        ctx.strokeStyle = "red";
-        ctx.strokeRect(snake[i].x, snake[i].y, box, box);
-    }
+    ctx.fillStyle = "green";
+    ctx.fillRect(snake[0].x, snake[0].y, box, box);
+    ctx.strokeStyle = "red";
+    ctx.strokeRect(snake[0].x, snake[0].y, box, box);
 
     // رسم الطعام
     ctx.fillStyle = "red";
@@ -74,14 +68,12 @@ function draw() {
     let newHead = { x: snakeX, y: snakeY };
 
     // تحقق من الاصطدام بجسم الأفعى
-    for (let i = 1; i < snake.length; i++) {
-        if (newHead.x === snake[i].x && newHead.y === snake[i].y) {
-            clearInterval(gameInterval);
-            gameOverSound.play();
-            saveScore();
-            alert(`انتهت اللعبة! نقاطك: ${score}`);
-            return;
-        }
+    if (collision(newHead, snake)) {
+        clearInterval(gameInterval);
+        gameOverSound.play();
+        saveScore();
+        alert(`انتهت اللعبة! نقاطك: ${score}`);
+        return;
     }
 
     snake.unshift(newHead);
@@ -103,6 +95,10 @@ function draw() {
 
     // تحديث النقاط
     document.getElementById("score").innerText = `Score: ${score} | Level: ${level}`;
+}
+
+function collision(head, array) {
+    return array.some(segment => segment.x === head.x && segment.y === head.y);
 }
 
 // حفظ وتحديث أعلى النتائج
@@ -130,20 +126,6 @@ function directionHandler(event) {
     if (event.keyCode === 38 && direction !== "DOWN") direction = "UP";
     if (event.keyCode === 39 && direction !== "LEFT") direction = "RIGHT";
     if (event.keyCode === 40 && direction !== "UP") direction = "DOWN";
-}
-
-function resetGame() {
-    clearInterval(gameInterval);
-    snake = [];
-    for (let i = 0; i < 5; i++) {
-        snake.push({ x: 9 * box, y: 10 * box - i * box });
-    }
-    direction = "UP";
-    score = 0;
-    level = 1;
-    speed = 150;
-    food = generateFood();
-    gameInterval = setInterval(draw, speed);
 }
 
 resetGame();
